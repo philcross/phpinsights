@@ -11,10 +11,17 @@ final class CyclomaticComplexityIsHigh extends Insight implements HasDetails
     /**
      * {@inheritdoc}
      */
+    protected $config = [
+        'maxComplexity' => 5,
+    ];
+
+    /**
+     * {@inheritdoc}
+     */
     public function hasIssue(): bool
     {
         foreach ($this->collector->getClassComplexity() as $complexity) {
-            if ($complexity > 5) {
+            if ($complexity > $this->config['maxComplexity']) {
                 return true;
             }
         }
@@ -27,7 +34,10 @@ final class CyclomaticComplexityIsHigh extends Insight implements HasDetails
      */
     public function getTitle(): string
     {
-        return sprintf('Having `classes` with more than 5 cyclomatic complexity is prohibited - Consider refactoring');
+        return sprintf(
+            'Having `classes` with more than %d cyclomatic complexity is prohibited - Consider refactoring',
+            $this->config['maxComplexity']
+        );
     }
 
     /**
@@ -35,8 +45,8 @@ final class CyclomaticComplexityIsHigh extends Insight implements HasDetails
      */
     public function getDetails(): array
     {
-        $classesComplexity = array_filter($this->collector->getClassComplexity(), static function ($complexity) {
-            return $complexity > 5;
+        $classesComplexity = array_filter($this->collector->getClassComplexity(), function ($complexity) {
+            return $complexity > $this->config['maxComplexity'];
         });
 
         uasort($classesComplexity, static function ($a, $b) {
